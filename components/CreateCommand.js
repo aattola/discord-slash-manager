@@ -18,7 +18,7 @@ export default function CreateCommand({ token }) {
     '/api/discord/commands',
     {
       body: {
-        token: 'Mzg2NDc3NzA0MDIwNDkyMjk4.WiKNaQ.qs3huoini1Ay-Gjj4xC7rpaKy8g',
+        token,
         guild: true,
         // action: 'GET',
         guildId: '279272653834027008',
