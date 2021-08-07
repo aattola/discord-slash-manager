@@ -101,12 +101,16 @@ export default function CreateCommand({ token, addCommandOption }) {
 
   return (
     <Container>
+      <Typography style={{ padding: '8px 4px' }}>
+        Command name must be lowercase. Max 32 letters
+      </Typography>
       <TextField
         value={commandName}
         maxLength="32"
         size="small"
-        onChange={(e) => setCommandName(e.target.value)}
-        label="command name"
+        onChange={(e) => setCommandName(e.target.value.toLowerCase())}
+        helperText="Max 32 letters must be lowercase"
+        label="Command name"
         style={{ margin: 5 }}
       />
       <TextField
@@ -114,14 +118,20 @@ export default function CreateCommand({ token, addCommandOption }) {
         maxLength="100"
         size="small"
         onChange={(e) => setDesc(e.target.value)}
-        label="description"
+        label="Description"
         style={{ margin: 5 }}
       />
-      <div style={{ padding: 15, paddingLeft: 5, minHeight: 65 }}>
+      <Typography style={{ padding: '8px 4px' }}>
+        Guild command is for specific guild (server). Handy in development{' '}
+        <br />
+        because global commands take 1-2 hours to update and to be visible.
+      </Typography>
+      <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
         <FormGroup style={{ margin: 5 }}>
           <FormControlLabel
             control={
               <Switch
+                style={{ height: 'fit-content' }}
                 checked={guild}
                 onChange={(e) => setGuild(e.target.checked)}
               />
@@ -135,7 +145,8 @@ export default function CreateCommand({ token, addCommandOption }) {
             size="small"
             value={guildId}
             onChange={(e) => setGuildId(e.target.value)}
-            label="guild id"
+            label="Guild id"
+            helperText="Or list seperated by comma (,)"
             style={{ margin: 5 }}
           />
         )}

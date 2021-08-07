@@ -38,6 +38,7 @@ export default function CreateCommandDialog({ newOption }) {
   // const [guildId, setGuildId] = useState('');
   // const [options, setOptions] = useState([]);
   const [choices, setChoices] = useState([]);
+  const [commandOptions, setCOptions] = useState([]);
   const [optionSettings, setOptionSettings] = useState({
     name: '',
     type: 'STRING',
@@ -45,11 +46,11 @@ export default function CreateCommandDialog({ newOption }) {
     required: false,
     choices: [],
     choicesToggle: false,
+    options: [],
+    commandOptionsToggle: false,
   });
 
   const optionTypes = [
-    'SUB_COMMAND',
-    'SUB_COMMAND_GROUP',
     'STRING',
     'INTEGER',
     'Number',
@@ -58,19 +59,26 @@ export default function CreateCommandDialog({ newOption }) {
     'CHANNEL',
     'ROLE',
     'MENTIONABLE',
+    // 'SUB_COMMAND', // TODO: GET WORKING
+    // 'SUB_COMMAND_GROUP',
   ];
 
   const handleClickOpen = () => {
     setOpen(true);
   };
-  const handleClose = () => {
-    setOpen(false);
-
+  const handleClose = (save = false) => {
     const { name, type, description, required, choicesToggle } = optionSettings;
     if (!name || !type || !description) {
+      if (save !== true) {
+        return setOpen(false);
+      }
+      // TODO: show error
       return console.log('unohit jotai');
     }
 
+    if (save) {
+      setOpen(false);
+    }
     const newOptioni = {
       name,
       type,
@@ -104,7 +112,11 @@ export default function CreateCommandDialog({ newOption }) {
 
   return (
     <div>
-      <Button variant="outlined" onClick={handleClickOpen}>
+      <Button
+        variant="outlined"
+        style={{ marginTop: 10 }}
+        onClick={handleClickOpen}
+      >
         Create parameter
       </Button>
       <Dialog
@@ -122,39 +134,22 @@ export default function CreateCommandDialog({ newOption }) {
           Add parameter
         </DialogTitle>
         <DialogContent dividers>
-          <Typography gutterBottom style={{ padding: '16px 4px' }}>
-            Huutista tämmöselle roskalle joka ei edes toimi ja on
-            ikuisuusprojekti
+          <Typography style={{ padding: '8px 4px' }}>
+            Names must be lowercase. Max 25 letters
           </Typography>
 
           <div>
-            <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">Type</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value="STRING"
-                label="Type"
-                onChange={(e) => {
-                  setOptionSettings({
-                    ...optionSettings,
-                    type: e.target.value,
-                  });
-                }}
-              >
-                {optionTypes.map((type) => (
-                  <MenuItem value={type}>{type}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
             <ChoiceContainer>
               <TextField
                 size="small"
                 value={optionSettings.name}
                 onChange={(e) =>
-                  setOptionSettings({ ...optionSettings, name: e.target.value })
+                  setOptionSettings({
+                    ...optionSettings,
+                    name: e.target.value.toLowerCase(),
+                  })
                 }
+                fullWidth
                 label="Name"
               />
               <TextField
@@ -166,69 +161,85 @@ export default function CreateCommandDialog({ newOption }) {
                     description: e.target.value,
                   })
                 }
+                fullWidth
                 label="Description"
               />
             </ChoiceContainer>
 
+            <FormControl fullWidth style={{ marginBottom: 10 }}>
+              <InputLabel id="demo-simple-select-label">Type</InputLabel>
+              <Select
+                size="small"
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={optionSettings.type}
+                label="Type"
+                onChange={(e) => {
+                  setOptionSettings({
+                    ...optionSettings,
+                    type: e.target.value,
+                  });
+                }}
+              >
+                {optionTypes.map((type) => (
+                  <MenuItem key={type} value={type}>
+                    {type}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
             <FormGroup>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={optionSettings.required}
-                    onChange={(e) =>
-                      setOptionSettings({
-                        ...optionSettings,
-                        required: e.target.checked,
-                      })
-                    }
-                    defaultChecked
-                  />
-                }
-                label="Required"
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={optionSettings.choicesToggle}
-                    onChange={(e) =>
-                      setOptionSettings({
-                        ...optionSettings,
-                        choicesToggle: e.target.checked,
-                      })
-                    }
-                  />
-                }
-                label="Choices"
-              />
+              <ChoiceContainer
+                style={{ margin: 0, display: 'flex', justifyContent: 'center' }}
+              >
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={optionSettings.choicesToggle}
+                      onChange={(e) =>
+                        setOptionSettings({
+                          ...optionSettings,
+                          choicesToggle: e.target.checked,
+                        })
+                      }
+                    />
+                  }
+                  label="Choices"
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={optionSettings.commandOptionsToggle}
+                      onChange={(e) =>
+                        setOptionSettings({
+                          ...optionSettings,
+                          commandOptionsToggle: e.target.checked,
+                        })
+                      }
+                    />
+                  }
+                  label="Options"
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={optionSettings.required}
+                      onChange={(e) =>
+                        setOptionSettings({
+                          ...optionSettings,
+                          required: e.target.checked,
+                        })
+                      }
+                    />
+                  }
+                  label="Required command"
+                />
+              </ChoiceContainer>
             </FormGroup>
 
-            {/* <Switch
-              onChange={(e, checked) =>
-                setOptionSettings({
-                  ...optionSettings,
-                  choicesToggle: checked.checked,
-                })
-              }
-              checked={optionSettings.choicesToggle}
-              label="Choices"
-              toggle
-            /> */}
-
             {optionSettings.choicesToggle && (
-              <div>
-                {/* <Typography style={{ padding: '16px 4px' }}>Toggle</Typography> */}
-                {/* <Input
-              value={optionSettings.description}
-              maxLength="100"
-              onChange={(e) =>
-                setOptionSettings({
-                  ...optionSettings,
-                  description: e.target.value,
-                })
-              }
-              label="name"
-            /> */}
-
+              <div style={{ marginTop: 10 }}>
                 {choices.map((choice, i) => (
                   <ChoiceContainer key={i}>
                     <TextField
@@ -237,7 +248,7 @@ export default function CreateCommandDialog({ newOption }) {
                       maxLength="100"
                       onChange={(e) => {
                         const _choices = [...choices];
-                        _choices[i].name = e.target.value;
+                        _choices[i].name = e.target.value.toLowerCase();
                         setChoices(_choices);
                       }}
                       label="Name"
@@ -248,7 +259,7 @@ export default function CreateCommandDialog({ newOption }) {
                       maxLength="100"
                       onChange={(e) => {
                         const _choices = [...choices];
-                        _choices[i].value = e.target.value;
+                        _choices[i].value = e.target.value.toLowerCase();
                         setChoices(_choices);
                       }}
                       label="Value"
@@ -282,7 +293,7 @@ export default function CreateCommandDialog({ newOption }) {
           </div>
         </DialogContent>
         <DialogActions>
-          <Button autoFocus onClick={handleClose}>
+          <Button autoFocus onClick={() => handleClose(true)}>
             Save changes
           </Button>
         </DialogActions>
