@@ -1,6 +1,5 @@
 import styled from 'styled-components';
 import Image from 'next/image';
-import { Checkbox, Dialog, Dropdown } from '@fluentui/react-northstar';
 
 import {
   TextField,
@@ -13,15 +12,16 @@ import {
   Typography,
   Switch,
 } from '@material-ui/core';
+import LoadingButton from '@material-ui/lab/LoadingButton';
 import useFetch from 'use-http';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import remove from '../public/remove.png';
 import CreateCommandDialog from './CreateCommandDialog';
 
 const Container = styled.div`
-  padding: 20px;
-  border: 2px solid black;
-  margin: 20px;
+  /* padding: 20px; */
+  /* border: 2px solid black;
+  margin: 20px; */
 `;
 
 const ChoiceContainer = styled.div`
@@ -29,72 +29,65 @@ const ChoiceContainer = styled.div`
   align-items: center;
 `;
 
-export default function CreateCommand({ token, addCommandOption }) {
+export default function CreateCommand({ token, addCommandOption, command }) {
   // const [token, setToken] = useState(false);
   const [commandName, setCommandName] = useState('');
+  const [editMode, setEdit] = useState(false);
   const [commandDesc, setDesc] = useState('');
   const [guild, setGuild] = useState(false);
   const [guildId, setGuildId] = useState('');
   const [options, setOptions] = useState([]);
-  const [choices, setChoices] = useState([]);
-  const [optionSettings, setOptionSettings] = useState({
-    name: '',
-    type: 'STRING',
-    description: '',
-    required: false,
-    choices: [],
-    choicesToggle: false,
+
+  const { loading, error, post } = useFetch('/api/discord/commands', {
+    body: {
+      token,
+    },
   });
 
-  const optionTypes = [
-    'SUB_COMMAND',
-    'SUB_COMMAND_GROUP',
-    'STRING',
-    'INTEGER',
-    'Number',
-    'BOOLEAN',
-    'USER',
-    'CHANNEL',
-    'ROLE',
-    'MENTIONABLE',
-  ];
-
-  const { loading, error, data, post, del } = useFetch(
-    '/api/discord/commands',
-    {
-      body: {
-        token,
-        guild: true,
-        // action: 'GET',
-        guildId: '279272653834027008',
-        commands: ['872954297820794930'],
-        // commands: [
-        //   {
-        //     name: 'testff',
-        //     description: 'Replies with your input!',
-        //     options: [
-        //       {
-        //         name: 'input',
-        //         type: 'STRING',
-        //         description: 'The input to echo back',
-        //         required: true,
-        //       },
-        //     ],
-        //   },
-        // ],
-      },
+  useEffect(() => {
+    if (!command) return;
+    setEdit(true);
+    setCommandName(command.name);
+    setDesc(command.description);
+    if (command.guild) {
+      setGuild(command.guild);
+      setGuildId(command.guildId);
     }
-  );
+
+    setOptions(command.options);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function createCommand() {
+    console.log('CREATING COMMAND');
+
+    const payload = {
+      // TODO: filter commandoptions so that options with required==true are first on the array dc requires this
+      // TODO: if guild == false then dont send guildId or guild
+      token,
+      guild,
+      action: 'CREATE',
+      guildId,
+      commands: [
+        {
+          name: commandName,
+          description: commandDesc,
+          options,
+        },
+      ],
+    };
+
+    post(payload);
+
+    console.log(payload);
+
+    command.close();
+  }
 
   function newOption(option) {
     const _options = [...options];
     _options.push(option);
     setOptions(_options);
-    setCommandName('');
-    setDesc('');
-    setGuild(false);
-    setGuildId('');
-    setChoices([]);
   }
 
   if (!token) console.log('Errorri: ei tokenia', token);
@@ -102,14 +95,19 @@ export default function CreateCommand({ token, addCommandOption }) {
   return (
     <Container>
       <Typography style={{ padding: '8px 4px' }}>
+        {editMode && (
+          <>
+            In edit mode changing name is not enabled at the moment <br />{' '}
+          </>
+        )}
         Command name must be lowercase. Max 32 letters
       </Typography>
       <TextField
+        disabled={editMode}
         value={commandName}
         maxLength="32"
         size="small"
         onChange={(e) => setCommandName(e.target.value.toLowerCase())}
-        helperText="Max 32 letters must be lowercase"
         label="Command name"
         style={{ margin: 5 }}
       />
@@ -126,7 +124,7 @@ export default function CreateCommand({ token, addCommandOption }) {
         <br />
         because global commands take 1-2 hours to update and to be visible.
       </Typography>
-      <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: '10px' }}>
         <FormGroup style={{ margin: 5 }}>
           <FormControlLabel
             control={
@@ -172,6 +170,16 @@ export default function CreateCommand({ token, addCommandOption }) {
           <Typography>Required {param.required ? 'true' : 'false'}</Typography>
         </div>
       ))}
+
+      <LoadingButton
+        style={{ marginTop: 10 }}
+        variant="contained"
+        onClick={createCommand}
+        loading={loading || undefined}
+        loadingPosition="start"
+      >
+        {!editMode ? 'Create' : 'Edit'} command
+      </LoadingButton>
     </Container>
   );
 }

@@ -1,17 +1,28 @@
 import styled from 'styled-components';
-import { Button, Input } from '@fluentui/react-northstar';
 import useFetch from 'use-http';
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
+import { Button } from '@material-ui/core';
 import CreateCommand from '../components/CreateCommand';
+import EditCommandDialog from '../components/EditCommandDialog';
 
 const Title = styled.h1`
   font-size: 50px;
   color: ${({ theme }) => theme.colors.primary};
 `;
 
+const CreateContainer = styled.div`
+  padding: 20px;
+  border: 2px solid black;
+  margin: 20px;
+`;
+
 function Home() {
   const [token, setToken] = useState('');
+  const [editState, setEdit] = useState({
+    editing: false,
+    command: {},
+  });
   // const [create, setCreate] = useState({});
   const { loading, error, data, post, del } = useFetch(
     '/api/discord/commands',
@@ -44,15 +55,25 @@ function Home() {
     console.log('addCommandOption, ', option);
   }
 
+  function editCommand(command) {
+    // TODO: command editing to work
+    console.log(command);
+    setEdit({ editing: true, command });
+  }
+
   if (error) console.log('Errorri: ', error);
 
   console.log(data, loading, error);
 
   return (
     <>
-      <CreateCommand token={token} addCommandOption={addCommandOption} />
+      <CreateContainer>
+        <CreateCommand token={token} addCommandOption={addCommandOption} />
+      </CreateContainer>
 
-      <Button loading={loading} onClick={() => post()} content="authenticate" />
+      <Button loading={loading} onClick={() => post()}>
+        Get guild commands ((Dev))
+      </Button>
       <Button
         loading={loading}
         onClick={() =>
@@ -63,13 +84,23 @@ function Home() {
             action: 'GET',
           })
         }
-        content="fetch"
-      />
-      <Button loading={loading} onClick={() => del()} content="delete" />
-      <Input
+      >
+        Fetch commands
+      </Button>
+      <Button loading={loading} onClick={() => del()}>
+        Del command ((dev))
+      </Button>
+      <input
         value={token}
         onChange={(e) => setToken(e.target.value)}
         label="bot token"
+      />
+      <EditCommandDialog
+        state={editState}
+        token={token}
+        close={() => {
+          setEdit({ ...editState, editing: false });
+        }}
       />
       {!error && (
         <div>
@@ -83,6 +114,7 @@ function Home() {
                   <h2>{command.description}</h2>
                   <Button
                     loading={loading}
+                    variant="outlined"
                     onClick={() =>
                       del({
                         token,
@@ -91,8 +123,16 @@ function Home() {
                         commands: [command.id],
                       })
                     }
-                    content="delete"
-                  />
+                  >
+                    Delete
+                  </Button>
+
+                  <Button
+                    variant="outlined"
+                    onClick={() => editCommand(command)}
+                  >
+                    Edit
+                  </Button>
                 </div>
               );
             })}

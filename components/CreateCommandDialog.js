@@ -207,7 +207,7 @@ export default function CreateCommandDialog({ newOption }) {
                   }
                   label="Choices"
                 />
-                <FormControlLabel
+                {/* <FormControlLabel
                   control={
                     <Switch
                       checked={optionSettings.commandOptionsToggle}
@@ -220,7 +220,7 @@ export default function CreateCommandDialog({ newOption }) {
                     />
                   }
                   label="Options"
-                />
+                /> */}
                 <FormControlLabel
                   control={
                     <Switch
@@ -233,7 +233,7 @@ export default function CreateCommandDialog({ newOption }) {
                       }
                     />
                   }
-                  label="Required command"
+                  label="Required option"
                 />
               </ChoiceContainer>
             </FormGroup>

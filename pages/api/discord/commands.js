@@ -3,6 +3,8 @@ import Discord, { Intents } from 'discord.js';
 export default async function handler(req, res) {
   const body = req.method === 'POST' ? req.body : JSON.parse(req.body);
 
+  console.log('DEBUG BODY;', body);
+
   if (body.token === undefined) {
     return res
       .status(500)
@@ -62,7 +64,7 @@ export default async function handler(req, res) {
       } catch (err) {
         return res
           .status(500)
-          .json({ error: 'guildId wrong maybe? fetch is failing' });
+          .json({ error: err, stringified: JSON.stringify(err) });
       }
       return;
     }
