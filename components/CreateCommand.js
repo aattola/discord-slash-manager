@@ -1,7 +1,22 @@
 import styled from 'styled-components';
-import { Button, Input, Checkbox, Dialog } from '@fluentui/react-northstar';
+import Image from 'next/image';
+import { Checkbox, Dialog, Dropdown } from '@fluentui/react-northstar';
+
+import {
+  TextField,
+  Button,
+  FormGroup,
+  FormControl,
+  FormControlLabel,
+  Select,
+  InputLabel,
+  Typography,
+  Switch,
+} from '@material-ui/core';
 import useFetch from 'use-http';
 import { useState } from 'react';
+import remove from '../public/remove.png';
+import CreateCommandDialog from './CreateCommandDialog';
 
 const Container = styled.div`
   padding: 20px;
@@ -9,11 +24,41 @@ const Container = styled.div`
   margin: 20px;
 `;
 
-export default function CreateCommand({ token }) {
+const ChoiceContainer = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+export default function CreateCommand({ token, addCommandOption }) {
   // const [token, setToken] = useState(false);
   const [commandName, setCommandName] = useState('');
+  const [commandDesc, setDesc] = useState('');
   const [guild, setGuild] = useState(false);
   const [guildId, setGuildId] = useState('');
+  const [options, setOptions] = useState([]);
+  const [choices, setChoices] = useState([]);
+  const [optionSettings, setOptionSettings] = useState({
+    name: '',
+    type: 'STRING',
+    description: '',
+    required: false,
+    choices: [],
+    choicesToggle: false,
+  });
+
+  const optionTypes = [
+    'SUB_COMMAND',
+    'SUB_COMMAND_GROUP',
+    'STRING',
+    'INTEGER',
+    'Number',
+    'BOOLEAN',
+    'USER',
+    'CHANNEL',
+    'ROLE',
+    'MENTIONABLE',
+  ];
+
   const { loading, error, data, post, del } = useFetch(
     '/api/discord/commands',
     {
@@ -41,38 +86,81 @@ export default function CreateCommand({ token }) {
     }
   );
 
+  function newOption(option) {
+    const _options = [...options];
+    _options.push(option);
+    setOptions(_options);
+    setCommandName('');
+    setDesc('');
+    setGuild(false);
+    setGuildId('');
+    setChoices([]);
+  }
+
   if (!token) console.log('Errorri: ei tokenia', token);
 
   return (
     <Container>
-      <Input
+      <TextField
         value={commandName}
+        maxLength="32"
+        size="small"
         onChange={(e) => setCommandName(e.target.value)}
         label="command name"
+        style={{ margin: 5 }}
       />
-
-      <Checkbox
-        onChange={(e, checked) => setGuild(checked.checked)}
-        checked={guild}
-        label="guild command"
-        toggle
+      <TextField
+        value={commandDesc}
+        maxLength="100"
+        size="small"
+        onChange={(e) => setDesc(e.target.value)}
+        label="description"
+        style={{ margin: 5 }}
       />
+      <div style={{ padding: 15, paddingLeft: 5, minHeight: 65 }}>
+        <FormGroup style={{ margin: 5 }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={guild}
+                onChange={(e) => setGuild(e.target.checked)}
+              />
+            }
+            label="Guild command"
+          />
+        </FormGroup>
 
-      {guild && (
-        <Input
-          value={guildId}
-          onChange={(e) => setGuildId(e.target.value)}
-          label="guild id"
-        />
-      )}
-
+        {guild && (
+          <TextField
+            size="small"
+            value={guildId}
+            onChange={(e) => setGuildId(e.target.value)}
+            label="guild id"
+            style={{ margin: 5 }}
+          />
+        )}
+      </div>
+      <CreateCommandDialog newOption={newOption} />
+      {/*
       <Dialog
         cancelButton="Cancel"
         confirmButton="Confirm"
-        content={<h1>moro</h1>}
-        header="Add command"
-        trigger={<Button content="Open a dialog" />}
-      />
+        onConfirm={addCommandOption}
+        content={
+
+        }
+        header="Option"
+        trigger={<Button variant="contained">Add option</Button>}
+      /> */}
+
+      {options.map((param, i) => (
+        <div key={i}>
+          {/* <h1>{param.name}</h1> */}
+          <Typography variant="h4">{param.name}</Typography>
+          <Typography>{param.description}</Typography>
+          <Typography>Required {param.required ? 'true' : 'false'}</Typography>
+        </div>
+      ))}
     </Container>
   );
 }

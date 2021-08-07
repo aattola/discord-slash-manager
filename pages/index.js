@@ -11,13 +11,13 @@ const Title = styled.h1`
 `;
 
 function Home() {
-  const [token, setToken] = useState(false);
+  const [token, setToken] = useState('');
   // const [create, setCreate] = useState({});
   const { loading, error, data, post, del } = useFetch(
     '/api/discord/commands',
     {
       body: {
-        token: 'orava',
+        token,
         guild: true,
         // action: 'GET',
         guildId: '279272653834027008',
@@ -40,13 +40,17 @@ function Home() {
     }
   );
 
+  function addCommandOption(option) {
+    console.log('addCommandOption, ', option);
+  }
+
   if (error) console.log('Errorri: ', error);
 
   console.log(data, loading, error);
 
   return (
     <>
-      <CreateCommand token={token} />
+      <CreateCommand token={token} addCommandOption={addCommandOption} />
 
       <Button loading={loading} onClick={() => post()} content="authenticate" />
       <Button
