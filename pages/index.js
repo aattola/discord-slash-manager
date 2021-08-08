@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import useFetch from 'use-http';
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
-import { Button } from '@material-ui/core';
+import { Button, Typography } from '@material-ui/core';
 import CreateCommand from '../components/CreateCommand';
 import EditCommandDialog from '../components/EditCommandDialog';
 
@@ -15,6 +15,40 @@ const CreateContainer = styled.div`
   padding: 20px;
   border: 2px solid black;
   margin: 20px;
+  border-radius: 8px;
+`;
+
+const CommandsContainer = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-rows: auto;
+  grid-gap: 20px;
+  margin-top: 10px;
+
+  margin: 20px;
+  padding: 20px;
+  border: 2px solid black;
+  border-radius: 8px;
+`;
+
+const CommandContainer = styled.div`
+  border-radius: 8px;
+  /* border: 1.5px solid rgba(189, 103, 84, 0.5); */
+  padding: 10px;
+  display: grid;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+  &:hover {
+    /* border: 1.5px solid black; */
+    /* filter: blur(24px); */
+    box-shadow: 0 4px 8px 2px rgb(0 0 0 / 8%);
+  }
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
 `;
 
 function Home() {
@@ -103,40 +137,44 @@ function Home() {
         }}
       />
       {!error && (
-        <div>
+        <CommandsContainer>
           {data &&
             data.data &&
             data.data.commands.map((command) => {
               console.log(command);
               return (
-                <div key={command.id}>
-                  <h1>{command.name}</h1>
-                  <h2>{command.description}</h2>
-                  <Button
-                    loading={loading}
-                    variant="outlined"
-                    onClick={() =>
-                      del({
-                        token,
-                        guild: !!command.guild,
-                        guildId: command.guildId,
-                        commands: [command.id],
-                      })
-                    }
-                  >
-                    Delete
-                  </Button>
+                <CommandContainer key={command.id}>
+                  <Typography>{command.name}</Typography>
+                  <Typography>{command.description}</Typography>
 
-                  <Button
-                    variant="outlined"
-                    onClick={() => editCommand(command)}
-                  >
-                    Edit
-                  </Button>
-                </div>
+                  <ButtonContainer>
+                    <Button
+                      loading={loading}
+                      size="small"
+                      onClick={() =>
+                        del({
+                          token,
+                          guild: !!command.guild,
+                          guildId: command.guildId,
+                          commands: [command.id],
+                        })
+                      }
+                    >
+                      Delete
+                    </Button>
+
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => editCommand(command)}
+                    >
+                      Edit
+                    </Button>
+                  </ButtonContainer>
+                </CommandContainer>
               );
             })}
-        </div>
+        </CommandsContainer>
       )}
     </>
   );
