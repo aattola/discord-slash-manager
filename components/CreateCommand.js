@@ -81,7 +81,9 @@ export default function CreateCommand({ token, addCommandOption, command }) {
 
     console.log(payload);
 
-    command.close();
+    if (command) {
+      command.close();
+    }
   }
 
   function newOption(option) {

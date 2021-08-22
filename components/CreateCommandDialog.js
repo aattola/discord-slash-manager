@@ -53,7 +53,7 @@ export default function CreateCommandDialog({ newOption }) {
   const optionTypes = [
     'STRING',
     'INTEGER',
-    'Number',
+    'NUMBER',
     'BOOLEAN',
     'USER',
     'CHANNEL',
